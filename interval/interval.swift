@@ -141,16 +141,23 @@ extension ArithmeticBound {
     //typealias PKG = Foundation
     // math functions - needs extension for each struct
     #if os(Linux)
-    public static func cos(x:Self)->    Self { return Self(Glibc.cos(Real(x))) }
-    public static func cosh(x:Self)->   Self { return Self(Glibc.cosh(Real(x))) }
-    public static func exp(x:Self)->    Self { return Self(Glibc.exp(Real(x))) }
-    public static func log(x:Self)->    Self { return Self(Glibc.log(Real(x))) }
-    public static func sin(x:Self)->    Self { return Self(Glibc.sin(Real(x))) }
-    public static func sinh(x:Self)->   Self { return Self(Glibc.sinh(Real(x))) }
-    public static func sqrt(x:Self)->   Self { return Self(Glibc.sqrt(Real(x))) }
-    public static func hypot(x:Self, _ y:Self)->Self { return Self(Glibc.hypot(Real(x), Real(y))) }
-    public static func atan2(y:Self, _ x:Self)->Self { return Self(Glibc.atan2(Real(y), Real(x))) }
-    public static func pow(x:Self, _ y:Self)->  Self { return Self(Glibc.pow(Real(x), Real(y))) }
+    public static func exp(x:Self)->    Self { return Self(Glibc.exp(DefaultType(x))) }
+    public static func log(x:Self)->    Self { return Self(Glibc.log(DefaultType(x))) }
+    public static func sqrt(x:Self)->   Self { return Self(Glibc.sqrt(DefaultType(x))) }
+    public static func atan2(y:Self, _ x:Self)->Self { return Self(Glibc.atan2(DefaultType(y), DefaultType(x))) }
+    public static func pow(y:Self, _ x:Self)->Self { return Self(Glibc.pow(DefaultType(y), DefaultType(x))) }
+    public static func cos(x:Self)->    Self { return Self(Glibc.cos(DefaultType(x))) }
+    public static func sin(x:Self)->    Self { return Self(Glibc.sin(DefaultType(x))) }
+    public static func tan(x:Self)->    Self { return Self(Glibc.tan(DefaultType(x))) }
+    public static func acos(x:Self)->   Self { return Self(Glibc.acos(DefaultType(x))) }
+    public static func asin(x:Self)->   Self { return Self(Glibc.asin(DefaultType(x))) }
+    public static func atan(x:Self)->   Self { return Self(Glibc.atan(DefaultType(x))) }
+    public static func cosh(x:Self)->   Self { return Self(Glibc.cosh(DefaultType(x))) }
+    public static func sinh(x:Self)->   Self { return Self(Glibc.sinh(DefaultType(x))) }
+    public static func tanh(x:Self)->   Self { return Self(Glibc.tanh(DefaultType(x))) }
+    public static func acosh(x:Self)->  Self { return Self(Glibc.acosh(DefaultType(x))) }
+    public static func asinh(x:Self)->  Self { return Self(Glibc.asinh(DefaultType(x))) }
+    public static func atanh(x:Self)->  Self { return Self(Glibc.atanh(DefaultType(x))) }
     #else
     public static func exp(x:Self)->    Self { return Self(Foundation.exp(DefaultType(x))) }
     public static func log(x:Self)->    Self { return Self(Foundation.log(DefaultType(x))) }
@@ -194,7 +201,7 @@ public func exp<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
 public func log<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     return interval(lo:T.log(x.lo), hi:T.log(x.hi))
 }
-// cos - critical at ±π
+// cos - critical at ±nπ
 public func cos<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     guard x.hi - x.lo < T(M_PI) else {
         return interval(lo:T(-1.0), hi:T(+1.0))
@@ -210,7 +217,7 @@ public func cos<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     }
     return interval(lo:cl, hi:ch)
 }
-// sin - critical at ±π/2
+// sin - critical at ±nπ/2
 public func sin<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     guard x.hi - x.lo < T(M_PI) else {
         return interval(lo:T(-1.0), hi:T(+1.0))

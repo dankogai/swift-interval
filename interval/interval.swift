@@ -88,6 +88,16 @@ public func * <T:ArithmeticBound>(lhs:ClosedInterval<T>, rhs:ClosedInterval<T>)-
     let hh = lhs.hi * rhs.hi
     return interval(lo:min(ll, lh, hl, hh), hi:max(ll, lh, hl, hh))
 }
+public func * <T:ArithmeticBound>(lhs:ClosedInterval<T>, rhs:T)->ClosedInterval<T> {
+    let ll = lhs.lo * rhs
+    let lh = lhs.lo * rhs
+    let hl = lhs.hi * rhs
+    let hh = lhs.hi * rhs
+    return interval(lo:min(ll, lh, hl, hh), hi:max(ll, lh, hl, hh))
+}
+public func * <T:ArithmeticBound>(lhs:T, rhs:ClosedInterval<T>)->ClosedInterval<T> {
+    return rhs * lhs
+}
 public func / <T:ArithmeticBound>(lhs:ClosedInterval<T>, rhs:ClosedInterval<T>)->ClosedInterval<T> {
     guard rhs.lo.isSignMinus == rhs.hi.isSignMinus else {
         return interval(lo:-(T.infinity), hi:+(T.infinity))
@@ -96,6 +106,9 @@ public func / <T:ArithmeticBound>(lhs:ClosedInterval<T>, rhs:ClosedInterval<T>)-
 }
 public func / <T:ArithmeticBound>(lhs:ClosedInterval<T>, rhs:T)->ClosedInterval<T> {
     return interval(lo:lhs.lo/rhs, hi:lhs.hi/rhs)
+}
+public func / <T:ArithmeticBound>(lhs:T, rhs:ClosedInterval<T>)->ClosedInterval<T> {
+    return interval(lhs, margin:0) / rhs
 }
 infix operator +- { associativity none precedence 145 }
 infix operator ± { associativity none precedence 145 }
@@ -184,14 +197,14 @@ extension ArithmeticBound {
 ///
 /// - parameter f: monotonic function that takes T and returns T
 /// - returns: a function that takes Interval<T> and returns Interval<T>
-public func monotonicFunc<T:ArithmeticBound>(f:T->T)->(ClosedInterval<T>->ClosedInterval<T>) {
+public func convertMonotonicFunc<T:ArithmeticBound>(f:T->T)->(ClosedInterval<T>->ClosedInterval<T>) {
     return { x in
         let l = f(x.lo)
         let h = f(x.hi)
         return interval(lo:min(l, h), hi:max(l, h))
     }
 }
-// monotonic
+/// sqrt is monotonic
 public func sqrt<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     return interval(lo:T.sqrt(x.lo), hi:T.sqrt(x.hi))
 }
@@ -201,34 +214,34 @@ public func exp<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
 public func log<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
     return interval(lo:T.log(x.lo), hi:T.log(x.hi))
 }
-// cos - critical at ±nπ
+// cos - critical at ±π
 public func cos<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
-    guard x.hi - x.lo < T(M_PI) else {
+    guard x.margin < T(M_PI) else {
         return interval(lo:T(-1.0), hi:T(+1.0))
     }
     let cl = T.cos(x.lo)
     let ch = T.cos(x.hi)
-    let t = interval(lo:x.lo % T(M_2_PI), hi:x.hi % T(M_2_PI))
+    let t = interval(T.atan2(T.cos(x.mid), T.sin(x.mid)), margin:x.margin) // normalize
     if t =~ T(0.0) {
         return interval(lo:min(cl, ch), hi:T(+1.0))
     }
-    else if t =~ T(+M_PI) || t =~ T(-M_PI) {
+    else if t =~ T(-M_PI) {
         return interval(lo:T(-1.0), hi:max(cl, ch))
     }
     return interval(lo:cl, hi:ch)
 }
-// sin - critical at ±nπ/2
+// sin - critical at ±π/2
 public func sin<T:ArithmeticBound>(x:ClosedInterval<T>)->ClosedInterval<T> {
-    guard x.hi - x.lo < T(M_PI) else {
+    guard x.margin < T(M_PI) else {
         return interval(lo:T(-1.0), hi:T(+1.0))
     }
     let sl = T.sin(x.lo)
     let sh = T.sin(x.hi)
-    let t = interval(lo:x.lo % T(M_2_PI), hi:x.hi % T(M_2_PI))
-    if t =~ T(+M_PI_2) || t =~ T(-3.0*M_PI_2) {
+    let t = interval(T.atan2(T.cos(x.mid), T.sin(x.mid)), margin:x.margin) // normalize
+    if t =~ T(+M_PI_2) {
         return interval(lo:min(sl, sh), hi:T(+1.0))
     }
-    else if t =~ T(+3.0*M_PI_2) || t =~ T(-M_PI_2) {
+    else if t =~ T(-M_PI_2) {
         return interval(lo:T(-1.0), hi:max(sl, sh))
     }
     return interval(lo:sl, hi:sh)

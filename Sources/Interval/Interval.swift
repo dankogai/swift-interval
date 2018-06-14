@@ -22,23 +22,24 @@ public struct Interval<F:IntervalElement> : Hashable, Codable {
 extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public typealias IntegerLiteralType = Element.IntegerLiteralType
     public typealias FloatLiteralType = Double
-    public init(_ x:Element) {
-        min = x - x.ulp
-        max = x + x.ulp
-    }
-    public init(signOf s:Interval, magnitudeOf m:Interval) {
-        self = Interval.nan
-    }
-    public init(_ x:Interval, _ y:Interval) {
-        self.init(min:Swift.min(x.min, y.min), max:Swift.max(x.max, y.max))
-    }
     public init(_ x:Element, _ y:Element) {
-        self.init(Interval(x), Interval(y))
+        self.min = Swift.min(x, y)
+        self.max = Swift.max(x, y)
+    }
+    public init(_ x:Element) {
+        self.init(x - x.ulp, x + x.ulp)
+    }
+    public init(_ x:Interval) {
+        self = x
     }
     public init(_ r:Range<Element>) {
         self.init(r.lowerBound, r.upperBound)
     }
-    public init(integerLiteral value: F.IntegerLiteralType) {
+    public init(signOf s:Interval, magnitudeOf m:Interval) {
+        let signum = Element(s.sign == .minus ? -1 : +1)
+        self.init(signum * m.min, signum * m.max)
+    }
+   public init(integerLiteral value: F.IntegerLiteralType) {
         self.init(Element(integerLiteral:value))
     }
     public init(floatLiteral value: Double) {
@@ -85,10 +86,10 @@ extension Interval: Comparable {
         return self < other
     }
     public func isLessThanOrEqualTo(_ other: Interval<F>) -> Bool {
-        return self <= other
+        return self.isLess(than: other) || self.isEqual(to: other)
     }
     public func isTotallyOrdered(belowOrEqualTo other: Interval<F>) -> Bool {
-        return self <= other
+        return self.isNaN || other.isNaN || self.isLessThanOrEqualTo(other)
     }
     public static func <(lhs: Interval, rhs: Element) -> Bool {
         return lhs.max < rhs
@@ -183,7 +184,6 @@ extension Interval : FloatingPoint {
     public var exponent:Exponent {
         return min.exponent != max.exponent ? avg.exponent : min.exponent
     }
-    
     public var significand: Interval {
         let (smin, smax) = (self.min.significand, self.max.significand)
         return Interval(min:Swift.min(smin, smax), max:Swift.max(smin, smax))
@@ -275,6 +275,6 @@ extension Interval : FloatingPoint {
 extension Interval : CustomStringConvertible {
     public var description:String {
         if self.isNaN || self.isInfinite {return "\(self.min)...\(self.max)"}
-        return "\(self.avg)±\(self.err))"
+        return "\(self.avg)±\(self.err)"
     }
 }

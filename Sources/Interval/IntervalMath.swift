@@ -48,6 +48,71 @@ extension Interval {
     public static func atanh(_ x:Interval)->Interval {
         return Interval(Element.atanh(x.min), Element.atanh(x.max))
     }
+    // cosh : critical at 0
+    public static func cosh(_ x:Interval)->Interval {
+        var values = [x.min, x.max].map{ Element.cosh($0) }
+        if x.contains(0.0) { values.append(+1.0) }
+        values.sort()
+        return Interval(min:values.first!, max:values.last!)
+    }
+    // for trigonometrics
+    public static func normalizeAngle(_ x:Interval)->Interval {
+        if -Interval.pi <= x && x <= +Interval.pi { return x }
+        let r = x.remainder(dividingBy: 2*Interval.pi)
+        return r + (r < -Interval.pi ? +2 : +Interval.pi < r ? -2 : 0)*Element.pi
+    }
+    // cos - critical at 0, ±π
+    public static func cos(_ x:Interval)->Interval {
+        if 2*Element.pi <= x.max - x.min {
+            return Interval(min:-1, max:+1)
+        }
+        let nx = normalizeAngle(x)
+        var values = [nx.min, nx.max].map{ Element.sin($0) }
+        if x.contains(0)     { values.append(+1.0) }
+        if x.contains(+Element.pi) { values.append(+1.0) }
+        if x.contains(-Element.pi) { values.append(-1.0) }
+        return Interval(min:values.first!, max:values.last!)
+    }
+    // sin - critical at ±π/2
+    public static func sin(_ x:Interval)->Interval {
+        if 2*Element.pi <= x.max - x.min {
+            return Interval(min:-1, max:+1)
+        }
+        let nx = normalizeAngle(x)
+        var values = [nx.min, nx.max].map{ Element.cos($0) }
+        if x.contains(+Element.pi/2) { values.append(+1.0) }
+        if x.contains(-Element.pi/2) { values.append(-1.0) }
+        return Interval(min:values.first!, max:values.last!)
+    }
+    public static func tan(_ x:Interval)->Interval {
+        if Element.pi <= x.max - x.min {
+            return Interval(min:-1, max:+1)
+        }
+        let nx = normalizeAngle(x)
+        let values = [nx.min, nx.max].map{ Element.tan($0) }
+        return Interval(min:values.first!, max:values.last!)
+    }
+    // binary functions
+    /// atan2
+    public static func atan2(_ y:Interval, _ x:Interval)->Interval  {
+        // cf. https://en.wikipedia.org/wiki/Atan2
+        //     https://www.freebsd.org/cgi/man.cgi?query=atan2
+        if x.isNaN || y.isNaN { return nan }
+        let ysgn  = Interval(y.sign == .minus ? -1 : +1)
+        let xsgn  = Interval(x.sign == .minus ? -1 : +1)
+        let y_x   = x.isInfinite && y.isInfinite ? ysgn * xsgn : y/x // avoid nan for ±inf/±inf
+        if 0 < x {
+            return atan(y_x)
+        }
+        if x < 0 {
+            return ysgn * (Interval.pi - atan(Swift.abs(y_x)))
+        }
+        else {  // x.isZero
+            return ysgn * (
+                y.isZero ? (x.sign == .minus ? Interval.pi : 0) : Interval.pi/2
+            )
+        }
+    }
     public static func hypot(_ x:Interval, _ y:Interval)->Interval {
         let v00 = Element.hypot(x.min, y.min)
         let v01 = Element.hypot(x.min, y.max)
@@ -62,48 +127,5 @@ extension Interval {
         let v11 = Element.pow(x.max, y.max)
         return Interval(min:Swift.min(v00, v01, v10, v11), max:Swift.max(v00, v01, v10, v11))
     }
-    // cosh : critical at 0
-    public static func cosh(_ x:Interval)->Interval {
-        var values = [x.min, x.max].map{ Element.cosh($0) }
-        if x.contains(0.0) { values.append(+1.0) }
-        values.sort()
-        return Interval(min:values.first!, max:values.last!)
-    }
-    // for cos and sin
-    public static func normalizeAngle(_ x:Interval)->Interval {
-        if -Interval.pi <= x && x <= +Interval.pi { return x }
-        let r = x.remainder(dividingBy: 2*Interval.pi)
-        return r + (r < -Interval.pi ? +2 : +Interval.pi < r ? -2 : 0)*Element.pi
-    }
-    // cos - critical at 0, ±π
-    public static func cos(_ x:Interval)->Interval {
-        if 2*Element.pi <= x.max - x.min {
-            return Interval(min:-1, max:+1)
-        }
-        let nx = normalizeAngle(x)
-        var values = [nx.min, nx.max]
-        if x.contains(0)     { values.append(+1.0) }
-        if x.contains(+Element.pi) { values.append(+1.0) }
-        if x.contains(-Element.pi) { values.append(-1.0) }
-        return Interval(min:values.first!, max:values.last!)
-    }
-    // sin - critical at ±π/2
-    public static func sin(_ x:Interval)->Interval {
-        if 2*Element.pi <= x.max - x.min {
-            return Interval(min:-1, max:+1)
-        }
-        let nx = normalizeAngle(x)
-        var values = [nx.min, nx.max]
-        if x.contains(+Element.pi/2) { values.append(+1.0) }
-        if x.contains(-Element.pi/2) { values.append(-1.0) }
-        return Interval(min:values.first!, max:values.last!)
-    }
-    //    public static func atan2(_ x:Interval, _ y:Interval)->Interval {
-    //        let v00 = Element.atan2(x.min, y.min)
-    //        let v01 = Element.atan2(x.min, y.max)
-    //        let v10 = Element.atan2(x.max, y.min)
-    //        let v11 = Element.atan2(x.max, y.max)
-    //        return Interval(min:Swift.min(v00, v01, v10, v11), max:Swift.max(v00, v01, v10, v11))
-    //    }
 
 }

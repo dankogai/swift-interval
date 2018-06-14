@@ -1,4 +1,10 @@
+[![Swift 4.1](https://img.shields.io/badge/swift-4.1-brightgreen.svg)](https://swift.org)
+[![MIT LiCENSE](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![build status](https://secure.travis-ci.org/dankogai/swift-interval.png)](http://travis-ci.org/dankogai/swift-interval)
+
+# Under reconstruction!
+
+This module is now rewritten for Swift 4 and Swift Package Manager
 
 # swift-interval
 
@@ -18,7 +24,7 @@ about1/about1           // 0.818181818181818...1.22222222222222
 ````
 ## Prerequisite
 
-Swift 2.0 or better, OS X or Linux.
+Swift 4.0 or better, OS X or Linux.
 
 ## Usage
 

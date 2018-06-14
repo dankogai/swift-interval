@@ -18,6 +18,9 @@ let package = Package(
         .target(
             name: "Interval",
             dependencies: ["FloatingPointMath"]),
+        .target(
+            name: "IntervalRun",
+            dependencies: ["Interval"]),
         .testTarget(
             name: "IntervalTests",
             dependencies: ["Interval"]),

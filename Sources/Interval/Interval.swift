@@ -4,6 +4,7 @@ public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, Float
 
 extension Double:   IntervalElement {}
 extension Float:    IntervalElement {}
+
 #if os(iOS) || os(watchOS)
 #else
 // extension Float80:  IntervalElement {}
@@ -21,7 +22,6 @@ public struct Interval<F:IntervalElement> : Hashable, Codable {
 extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public typealias IntegerLiteralType = Element.IntegerLiteralType
     public typealias FloatLiteralType = Double
-
     public init(_ x:Element) {
         min = x - x.ulp
         max = x + x.ulp
@@ -48,6 +48,9 @@ extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
         return (min + max)/2
     }
     public var mid:Element { return avg }
+    public var err:Element {
+        return Swift.abs(avg - min)
+    }
 }
 /// comparison
 extension Interval: Comparable {
@@ -113,6 +116,12 @@ extension Interval : SignedNumeric { // already Numeric
     public var magnitude: Interval {
         return min.sign != max.sign ? self : min.sign == .minus ? -self : self
     }
+    public static func * (lhs: Element, rhs: Interval) -> Interval {
+        return Interval(min:lhs * rhs.min, max:lhs * rhs.max)
+    }
+    public static func * (lhs: Interval, rhs: Element) -> Interval {
+        return Interval(min:lhs.min * rhs, max:lhs.max * rhs)
+    }
     public static func * (lhs: Interval, rhs: Interval) -> Interval {
         let v00 = lhs.min * rhs.min
         let v01 = lhs.min * rhs.max
@@ -123,11 +132,23 @@ extension Interval : SignedNumeric { // already Numeric
     public static func *= (lhs: inout Interval, rhs: Interval) {
         lhs = lhs * rhs
     }
+    public static func + (lhs: Element, rhs: Interval) -> Interval {
+        return Interval(min:lhs + rhs.min, max:lhs + rhs.max)
+    }
+    public static func + (lhs: Interval, rhs: Element) -> Interval {
+        return Interval(min:lhs.min + rhs, max:lhs.max + rhs)
+    }
     public static func + (lhs: Interval, rhs: Interval) -> Interval {
         return Interval(min:lhs.min + rhs.min, max:lhs.max + rhs.max)
     }
     public static func += (lhs: inout Interval, rhs: Interval) {
         lhs = lhs + rhs
+    }
+    public static func - (lhs: Element, rhs: Interval) -> Interval {
+        return Interval(min:lhs - rhs.min, max:lhs - rhs.max)
+    }
+    public static func - (lhs: Interval, rhs: Element) -> Interval {
+        return Interval(min:lhs.min - rhs, max:lhs.max - rhs)
     }
     public static func - (lhs: Interval, rhs: Interval) -> Interval {
         return lhs + (-rhs)
@@ -221,12 +242,21 @@ extension Interval : FloatingPoint {
     public static func / (lhs: Interval, rhs: Interval) -> Interval {
         return lhs * rhs.reciprocal
     }
+    public static func / (lhs: Element, rhs: Interval) -> Interval {
+        return Interval(min:lhs, max:lhs) * rhs.reciprocal
+    }
+    public static func / (lhs: Interval, rhs: Element) -> Interval {
+        return Interval(min:lhs.min/rhs, max:lhs.max/rhs)
+    }
     public static func /= (lhs: inout Interval, rhs: Interval) {
         lhs = lhs / rhs
     }
-    // remainder is undefined -> NaN
-    public mutating func formRemainder(dividingBy other: Interval) { self = Interval.nan }
-    public mutating func formTruncatingRemainder(dividingBy other: Interval) { self = Interval.nan }
+    public mutating func formTruncatingRemainder(dividingBy other: Interval) {
+        self = self / other.rounded()
+    }
+    public mutating func formRemainder(dividingBy other: Interval) {
+        self -= self.truncatingRemainder(dividingBy: other)
+    }
     public mutating func formSquareRoot() {
         self.min = self.min.squareRoot()
         self.max = self.max.squareRoot()
@@ -245,6 +275,6 @@ extension Interval : FloatingPoint {
 extension Interval : CustomStringConvertible {
     public var description:String {
         if self.isNaN || self.isInfinite {return "\(self.min)...\(self.max)"}
-        return "\(self.avg)±\(Swift.abs(self.avg - self.min))"
+        return "\(self.avg)±\(self.err))"
     }
 }

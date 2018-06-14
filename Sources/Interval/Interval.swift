@@ -1,6 +1,6 @@
 import FloatingPointMath
 
-public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, FloatingPointMath, Codable {}
+public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, FloatingPointMath {}
 
 extension Double:   IntervalElement {}
 extension Float:    IntervalElement {}
@@ -10,7 +10,7 @@ extension Float:    IntervalElement {}
 // extension Float80:  IntervalElement {}
 #endif
 /// definition
-public struct Interval<F:IntervalElement> : Hashable, Codable {
+public struct Interval<F:IntervalElement> : Hashable {
     public typealias Element = F
     public var (min, max):(F, F)
     public init(min:F, max:F) {
@@ -277,4 +277,21 @@ extension Interval : CustomStringConvertible {
         if self.isNaN || self.isInfinite {return "\(self.min)...\(self.max)"}
         return "\(self.avg)±\(self.err)"
     }
+}
+extension Interval : Codable where F:Codable {
+    public enum CodingKeys : String, CodingKey {
+        public typealias RawValue = String
+        case min, max
+    }
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        self.min = try values.decode(Element.self, forKey: .min)
+        self.max = try values.decode(Element.self, forKey: .max)
+    }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.min, forKey: .min)
+        try container.encode(self.max, forKey: .max)
+    }
+
 }

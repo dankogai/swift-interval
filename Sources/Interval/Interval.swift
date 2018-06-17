@@ -272,10 +272,13 @@ extension Interval : FloatingPoint {
     }
 }
 /// CustomStringConvertible
-extension Interval : CustomStringConvertible {
+extension Interval : CustomStringConvertible, CustomDebugStringConvertible {
     public var description:String {
-        if self.isNaN || self.isInfinite {return "\(self.min)...\(self.max)"}
+        if self.isNaN || self.isInfinite { return self.debugDescription }
         return "\(self.avg)±\(self.err)"
+    }
+    public var debugDescription:String {
+        return "(\(self.min)...\(self.max))"
     }
 }
 extension Interval : Codable where F:Codable {
@@ -293,5 +296,15 @@ extension Interval : Codable where F:Codable {
         try container.encode(self.min, forKey: .min)
         try container.encode(self.max, forKey: .max)
     }
-
+}
+/// operators
+infix operator +-: AdditionPrecedence
+infix operator ±: AdditionPrecedence
+extension IntervalElement {
+    public static func +- (_ lhs:Self, _ rhs:Self)->Interval<Self> {
+        return Interval(lhs - rhs, lhs + rhs)
+    }
+    public static func ± (_ lhs:Self, _ rhs:Self)->Interval<Self> {
+        return Interval(lhs - rhs, lhs + rhs)
+    }
 }

@@ -1,6 +1,6 @@
 import FloatingPointMath
 
-public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, FloatingPointMath {}
+public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, CustomDebugStringConvertible, FloatingPointMath {}
 
 extension Double:   IntervalElement {}
 extension Float:    IntervalElement {}
@@ -278,7 +278,7 @@ extension Interval : CustomStringConvertible, CustomDebugStringConvertible {
         return "\(self.avg)±\(self.err)"
     }
     public var debugDescription:String {
-        return "(\(self.min)...\(self.max))"
+        return "(\(self.min.debugDescription)...\(self.max.debugDescription))"
     }
 }
 extension Interval : Codable where F:Codable {

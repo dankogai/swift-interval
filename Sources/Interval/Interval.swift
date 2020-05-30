@@ -191,17 +191,20 @@ extension Interval : FloatingPoint {
     public static var radix:Int {
         return Element.radix
     }
-    //
-    public init (_ value:UInt)  { self.init(Element(value)) }
-    public init (_ value:UInt8) { self.init(Element(value)) }
-    public init (_ value:UInt16){ self.init(Element(value)) }
-    public init (_ value:UInt32){ self.init(Element(value)) }
-    public init (_ value:UInt64){ self.init(Element(value)) }
-    public init (_ value:Int)   { self.init(Element(value)) }
-    public init (_ value:Int8)  { self.init(Element(value)) }
-    public init (_ value:Int16) { self.init(Element(value)) }
-    public init (_ value:Int32) { self.init(Element(value)) }
-    public init (_ value:Int64) { self.init(Element(value)) }
+    // Thanks to Swift 5 this is now generic!
+    //    public init (_ value:UInt)  { self.init(Element(value)) }
+    //    public init (_ value:UInt8) { self.init(Element(value)) }
+    //    public init (_ value:UInt16){ self.init(Element(value)) }
+    //    public init (_ value:UInt32){ self.init(Element(value)) }
+    //    public init (_ value:UInt64){ self.init(Element(value)) }
+    //    public init (_ value:Int)   { self.init(Element(value)) }
+    //    public init (_ value:Int8)  { self.init(Element(value)) }
+    //    public init (_ value:Int16) { self.init(Element(value)) }
+    //    public init (_ value:Int32) { self.init(Element(value)) }
+    //    public init (_ value:Int64) { self.init(Element(value)) }
+    public init<Source>(_ value: Source) where Source : BinaryInteger {
+        self.init(Element(value))
+    }
     //
     public static var nan:Interval          { return Interval(min:Element.nan, max:Element.nan) }
     public var isNaN:Bool                   { return self.min.isNaN || self.max.isNaN }

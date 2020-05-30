@@ -2,10 +2,6 @@
 [![MIT LiCENSE](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![build status](https://secure.travis-ci.org/dankogai/swift-interval.png)](http://travis-ci.org/dankogai/swift-interval)
 
-# Under reconstruction!
-
-This module is now rewritten for Swift 5 and Swift Package Manager
-
 # swift-interval
 
 [Interval Arithmetic] in Swift with Interval Type
@@ -61,3 +57,7 @@ git clone https://github.com/dankogai/swift-interval.git
 cd swift-interval
 make SWIFTPATH=${YOUR_SWIFT_PATH} repl # ${YOUR_SWIFT_PATH}=~/swift/usr/bin in my case
 ````
+
+### Prerequisite
+
+Swift 5 or better, OS X or Linux to build.

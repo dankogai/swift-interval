@@ -1,6 +1,7 @@
-import FloatingPointMath
+import RealModule
 
-public protocol IntervalElement: FloatingPoint, ExpressibleByFloatLiteral, CustomDebugStringConvertible, FloatingPointMath {}
+public protocol IntervalElement: Real,
+    ExpressibleByFloatLiteral, CustomDebugStringConvertible {}
 
 extension Double:   IntervalElement {}
 extension Float:    IntervalElement {}
@@ -43,7 +44,7 @@ extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
         self.init(Element(integerLiteral:value))
     }
     public init(floatLiteral value: Double) {
-        self.init(Element(value))
+        self.init(Element(floatLiteral:value as! F.FloatLiteralType))
     }
     public var avg:Element {
         return (min + max)/2

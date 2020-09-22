@@ -12,12 +12,15 @@ let package = Package(
           targets: ["Interval"]),
     ],
     dependencies: [
-      .package(url: "https://github.com/dankogai/swift-floatingpointmath.git", from: "0.0.7")
+      //.package(url: "https://github.com/dankogai/swift-floatingpointmath.git", from: "0.0.7")
+      .package(url: "https://github.com/apple/swift-numerics", from: "0.0.8"),
     ],
     targets: [
         .target(
-            name: "Interval",
-            dependencies: ["FloatingPointMath"]),
+           name: "Interval",
+           dependencies: [
+               .product(name: "Numerics", package: "swift-numerics")
+           ]),
         .target(
             name: "IntervalRun",
             dependencies: ["Interval"]),

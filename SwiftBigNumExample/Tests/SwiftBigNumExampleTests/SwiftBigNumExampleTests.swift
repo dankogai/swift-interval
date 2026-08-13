@@ -1,7 +1,6 @@
 import Testing
 import BigNum
 import Interval
-import RealModule
 @testable import SwiftBigNumExample
 
 @Suite struct SwiftBigNumExampleTests {

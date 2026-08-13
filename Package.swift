@@ -10,15 +10,10 @@ let package = Package(
           name: "Interval",
           targets: ["Interval"]),
     ],
-    dependencies: [
-      .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
-    ],
+    dependencies: [],
     targets: [
         .target(
-           name: "Interval",
-           dependencies: [
-               .product(name: "Numerics", package: "swift-numerics")
-           ]),
+           name: "Interval"),
         .executableTarget(
             name: "IntervalRun",
             dependencies: ["Interval"]),

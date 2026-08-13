@@ -1,6 +1,10 @@
-import RealModule
-
-extension Interval : Real {
+/// The same math, lifted from elements to intervals.
+///
+/// Not a protocol conformance -- the module has no math protocol to conform to,
+/// on purpose.  These are the members themselves, under `RealModule.Real`'s
+/// names; a consumer that imports swift-numerics can point at them with an empty
+/// `extension Interval: @retroactive Real {}` if it wants one.
+extension Interval {
     // monotonic functions are easy
     public static func sqrt(_ x:Self)->Self {
         return Self(Element.sqrt(x.min), Element.sqrt(x.max))

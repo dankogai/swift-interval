@@ -1,10 +1,39 @@
-import RealModule
-
-public protocol IntervalElement: Real, Sendable,
-    ExpressibleByFloatLiteral, CustomDebugStringConvertible {}
-
-extension Double:   IntervalElement {}
-extension Float:    IntervalElement {}
+/// What a type must bring to live inside an `Interval`.
+///
+/// The function requirements deliberately share their names and signatures with
+/// swift-numerics' `RealModule.Real`, and there are deliberately no default
+/// implementations here -- so for any type that is already a `Real` (`Float`,
+/// `BigRat`, `BigFloat`, ...) the conformance is one empty extension, with the
+/// existing members as witnesses and nothing to break the tie.  That is also why
+/// this module depends on nothing: `Double` conforms right here, via libm --
+/// see Double+IntervalElement.swift.
+public protocol IntervalElement: FloatingPoint, Sendable,
+    ExpressibleByFloatLiteral, CustomDebugStringConvertible {
+    static func sqrt(_ x: Self) -> Self
+    static func exp(_ x: Self) -> Self
+    static func exp2(_ x: Self) -> Self
+    static func expMinusOne(_ x: Self) -> Self
+    static func log(_ x: Self) -> Self
+    static func log2(_ x: Self) -> Self
+    static func log10(_ x: Self) -> Self
+    static func log(onePlus x: Self) -> Self
+    static func sin(_ x: Self) -> Self
+    static func cos(_ x: Self) -> Self
+    static func tan(_ x: Self) -> Self
+    static func asin(_ x: Self) -> Self
+    static func acos(_ x: Self) -> Self
+    static func atan(_ x: Self) -> Self
+    static func sinh(_ x: Self) -> Self
+    static func cosh(_ x: Self) -> Self
+    static func tanh(_ x: Self) -> Self
+    static func asinh(_ x: Self) -> Self
+    static func acosh(_ x: Self) -> Self
+    static func atanh(_ x: Self) -> Self
+    static func hypot(_ x: Self, _ y: Self) -> Self
+    static func pow(_ x: Self, _ y: Self) -> Self
+    static func pow(_ x: Self, _ n: Int) -> Self
+    static func root(_ x: Self, _ n: Int) -> Self
+}
 
 #if arch(x86_64) && !os(Windows) && !os(Android)
 // extension Float80:  IntervalElement {}

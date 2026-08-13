@@ -10,9 +10,6 @@
 //
 import BigNum
 import Interval
-// RealModule too, and not only for tidiness: a conformance is only usable in a
-// file that imports the module declaring it.
-import RealModule
 
 /// A point stays a point.
 ///

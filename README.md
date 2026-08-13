@@ -20,7 +20,9 @@ about1/about1           // 0.818181818181818...1.22222222222222
 ````
 ## Prerequisite
 
-Swift 6.0 or better, macOS or Linux.
+Swift 6.0 or better, macOS or Linux.  This package depends on nothing: `Double`
+conforms to `IntervalElement` out of the box, via libm.  Other element types are
+one empty extension away — see the example subpackages below.
 
 ## Usage
 
@@ -59,12 +61,29 @@ Have fun with [macOS.playground] that is a part of this git repo.
 
 [macOS.playground]: ./macOS.playground
 
+### with swift-numerics
+
+`IntervalElement`'s function requirements deliberately share their names and
+signatures with [apple/swift-numerics]' `Real`, so any `Real` type is one empty
+extension away from being an element.
+[SwiftNumericsExample](./SwiftNumericsExample/) conforms `Float` that way — and
+goes the other direction too, making `Interval` itself a `RealModule.Real`, so
+intervals flow through code written generically for scalars:
+
+```swift
+extension Float: @retroactive IntervalElement {}
+
+func rms<T: Real>(_ x: T, _ y: T) -> T { T.sqrt((x*x + y*y)/2) }
+rms(3.0 ± 0.1, 4.0 ± 0.1)   // 3.5355622…±0.0989941…
+```
+
+[apple/swift-numerics]: https://github.com/apple/swift-numerics
+
 ### with swift-bignum
 
-`Interval` works with number types beyond `Double` and `Float` — anything that can
-be made an `IntervalElement`. [SwiftBigNumExample](./SwiftBigNumExample/) shows
-`Interval<BigRat>` and `Interval<BigFloat>` via [dankogai/swift-bignum], where
-interval arithmetic becomes *exact*:
+The same one-liner works for [dankogai/swift-bignum].
+[SwiftBigNumExample](./SwiftBigNumExample/) shows `Interval<BigRat>` and
+`Interval<BigFloat>`, where interval arithmetic becomes *exact*:
 
 ```swift
 let about1 = BigRat(1) ± BigRat(1, 10)   // [9/10, 11/10]

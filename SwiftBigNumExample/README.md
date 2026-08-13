@@ -8,31 +8,28 @@ numbers inside.
 cd SwiftBigNumExample && swift test
 ```
 
-A package of its own, so that swift-interval's own manifest depends on nothing but
-swift-numerics — SwiftPM resolves every declared dependency whether the target
-using it is being built or not.
+A package of its own, so that swift-interval's own manifest fetches nothing —
+SwiftPM resolves every declared dependency whether the target using it is being
+built or not.
 
 ## The whole conformance
 
 ```swift
 import BigNum
 import Interval
-import RealModule
 
-extension BigRat: @retroactive RealModule.Real {}
 extension BigRat: @retroactive IntervalElement {}
-
-extension BigFloat: @retroactive RealModule.Real {}
 extension BigFloat: @retroactive IntervalElement {}
 ```
 
-That is it. `IntervalElement` asks for `RealModule.Real`, `Sendable`,
-`ExpressibleByFloatLiteral`, and `CustomDebugStringConvertible`. BigNum's types
-bring the last three with them, and its own `Real` is a deliberately separate
-protocol with the same requirement set as swift-numerics', so that the library
-needs no dependency — every method asked for is already there under the same name
-and signature. The `@retroactive` is Swift 6 asking you to say out loud that you,
-not BigNum, own these conformances.
+That is it. `IntervalElement`'s function requirements share their names and
+signatures with swift-numerics' `RealModule.Real`, and BigNum's own `Real`
+declares that same requirement set too — three libraries agreeing on a vocabulary
+so that none of them has to depend on another. BigNum's types already carry every
+witness, plus the `Sendable`, `ExpressibleByFloatLiteral`, and
+`CustomDebugStringConvertible` that `IntervalElement` also asks for. The
+`@retroactive` is Swift 6 asking you to say out loud that you, not BigNum, own
+these conformances.
 
 ## What it buys you
 

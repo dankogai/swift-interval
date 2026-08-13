@@ -209,7 +209,7 @@ extension Interval : FloatingPoint {
     public static var nan:Interval          { return Interval(min:Element.nan, max:Element.nan) }
     public var isNaN:Bool                   { return self.min.isNaN || self.max.isNaN }
     public static var signalingNaN:Interval { return Interval(min:Element.signalingNaN, max:Element.signalingNaN) }
-    public var isSignalingNaN:Bool          { return self.min.isNaN || self.max.isNaN }
+    public var isSignalingNaN:Bool          { return self.min.isSignalingNaN || self.max.isSignalingNaN }
     public static var infinity:Interval     { return Interval(min:Element.infinity, max:Element.infinity) }
     public var isInfinite:Bool              { return self.min.isInfinite || self.max.isInfinite }
     public var isFinite:Bool                { return self.min.isFinite   && self.max.isFinite   }
@@ -233,7 +233,7 @@ extension Interval : FloatingPoint {
         return Interval(min:u, max:u)
     }
     public var nextUp: Interval<F> {
-        return self + ulp
+        return Interval(min:self.min.nextUp, max:self.max.nextUp)
     }
     public var reciprocal:Interval {
         return self.isZero

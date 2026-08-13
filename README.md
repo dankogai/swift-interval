@@ -1,6 +1,6 @@
-[![Swift 5](https://img.shields.io/badge/swift-5-blue.svg)](https://swift.org)
+[![Swift 6](https://img.shields.io/badge/swift-6-blue.svg)](https://swift.org)
 [![MIT LiCENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![build status](https://secure.travis-ci.org/dankogai/swift-interval.png)](http://travis-ci.org/dankogai/swift-interval)
+[![build status](https://github.com/dankogai/swift-interval/actions/workflows/swift.yml/badge.svg)](https://github.com/dankogai/swift-interval/actions/workflows/swift.yml)
 
 # swift-interval
 
@@ -11,7 +11,7 @@
 ## Synopsis
 
 ````swift
-import Interval         // needed only if you "make repl"
+import Interval
 let about1 = 1.0 ± 0.1  // 0.9...1.1
 about1+about1           // 1.8...2.2
 about1-about1           // -0.2...0.2
@@ -20,44 +20,47 @@ about1/about1           // 0.818181818181818...1.22222222222222
 ````
 ## Prerequisite
 
-Swift 5.0 or better, OS X or Linux.
+Swift 6.0 or better, macOS or Linux.
 
 ## Usage
 
-### in your project:
+### build
 
-Just add [interval.swift] to it.
+```sh
+git clone https://github.com/dankogai/swift-interval.git
+cd swift-interval
+swift build
+```
 
-[interval.swift]: ./interval/interval.swift
+### REPL
+
+```sh
+swift run --repl
+```
+
+```swift
+import Interval
+let about1 = 1.0 ± 0.1
+```
+
+### in your project
+
+Add the following to the `dependencies` of your `Package.swift`:
+
+```swift
+.package(url: "https://github.com/dankogai/swift-interval.git", from: "1.0.0")
+```
+
+and add `"Interval"` to the dependencies of your target.
 
 ### with playground
 
-Have fun with [Interval.playground] that is a part of this git repo.
+Have fun with [macOS.playground] that is a part of this git repo.
 
-[Interval.playground]: ./Interval.playground
+[macOS.playground]: ./macOS.playground
 
-When you use it, make sure you turn on the left pane (it's off right after you pulled since UI settings are `.gitignore`d).  As you see above, this playground consists of multiple pages and sources.
+## Test
 
-#### with your playground
-
-Just drop [interval.swift] to `Sources`.  In git `Interval.playground/Sources/interval.swift` is a symlink thereto.
-
-### REPL via command line:
-
-#### OS X with Xcode
-````shell
-git clone https://github.com/dankogai/swift-interval.git
-cd swift-interval
-make repl
-````
-
-#### Linux
-````shell
-git clone https://github.com/dankogai/swift-interval.git
-cd swift-interval
-make SWIFTPATH=${YOUR_SWIFT_PATH} repl # ${YOUR_SWIFT_PATH}=~/swift/usr/bin in my case
-````
-
-### Prerequisite
-
-Swift 5 or better, OS X or Linux to build.
+```sh
+swift test
+```

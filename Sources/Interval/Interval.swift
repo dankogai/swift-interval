@@ -283,11 +283,34 @@ extension Interval : FloatingPoint {
     public static func /= (lhs: inout Interval, rhs: Interval) {
         lhs = lhs / rhs
     }
+    /// If every quotient in `self/other` truncates to the same integer `n`, the
+    /// remainder is `self - n*other`, exactly as for scalars.  If the quotient
+    /// interval spans a discontinuity, fall back to the widest the remainder
+    /// can be: magnitude below `|other|`, signed like the dividend.
     public mutating func formTruncatingRemainder(dividingBy other: Interval) {
-        self = self / other.rounded()
+        let q = self / other
+        let n = q.min.rounded(.towardZero)
+        if n == q.max.rounded(.towardZero) && n.isFinite {
+            self = self - Interval(min:n, max:n) * other
+        } else {
+            let m = Swift.max(Swift.abs(other.min), Swift.abs(other.max))
+            self = 0 <= self.min ? Interval(min:0,  max:m)
+                 : self.max <= 0 ? Interval(min:-m, max:0)
+                 :                 Interval(min:-m, max:m)
+        }
     }
+    /// Same shape as `formTruncatingRemainder`, with round-to-nearest-even in
+    /// place of truncation and `[-|other|/2, +|other|/2]` as the fallback --
+    /// the IEEE 754 remainder, lifted.
     public mutating func formRemainder(dividingBy other: Interval) {
-        self -= self.truncatingRemainder(dividingBy: other)
+        let q = self / other
+        let n = q.min.rounded(.toNearestOrEven)
+        if n == q.max.rounded(.toNearestOrEven) && n.isFinite {
+            self = self - Interval(min:n, max:n) * other
+        } else {
+            let h = Swift.max(Swift.abs(other.min), Swift.abs(other.max)) / F(2)
+            self = Interval(min:-h, max:+h)
+        }
     }
     public mutating func formSquareRoot() {
         self.min = self.min.squareRoot()

@@ -65,40 +65,56 @@ extension Interval {
         return Self(min:values.first!, max:values.last!)
     }
     // for trigonometrics
+    /// Shift by a whole number of periods so the midpoint lands in [-π, +π].
+    /// The shift is `n` times an *enclosure* of 2π, so the result honestly
+    /// carries the uncertainty of range-reducing with an inexact π; the width
+    /// is otherwise preserved.  For width < 2π the result lies within (-2π, 2π),
+    /// which is what the critical-value checks in sin/cos/tan below assume.
     public static func normalizeAngle(_ x:Self)->Self {
-        if -Self.pi <= x && x <= +Self.pi { return x }
-        let r = x.remainder(dividingBy: 2*Self.pi)
-        return r + (r < -Self.pi ? +2 : +Self.pi < r ? -2 : 0)*Element.pi
+        if Self(min:-Element.pi, max:+Element.pi).contains(x) { return x }
+        let n = (x.mid / (2 * Element.pi)).rounded(.toNearestOrEven)
+        return x - Self(min:n, max:n) * (Self.pi + Self.pi)
     }
-    // cos - critical at 0, ±π
+    // cos - within (-2π, 2π): maxima (+1) only at 0, minima (-1) at ±π
     public static func cos(_ x:Self)->Self {
+        if x.isNaN { return nan }
         if 2*Element.pi <= x.max - x.min {
             return Self(min:-1, max:+1)
         }
         let nx = normalizeAngle(x)
-        var values = [nx.min, nx.max].map{ Element.sin($0) }
-        if x.contains(0)     { values.append(+1.0) }
-        if x.contains(+Element.pi) { values.append(+1.0) }
-        if x.contains(-Element.pi) { values.append(-1.0) }
+        var values = [Element.cos(nx.min), Element.cos(nx.max)]
+        if nx.contains(0)                                       { values.append(+1.0) }
+        if nx.contains(+Element.pi) || nx.contains(-Element.pi) { values.append(-1.0) }
+        values.sort()
         return Self(min:values.first!, max:values.last!)
     }
-    // sin - critical at ±π/2
+    // sin - within (-2π, 2π): maxima (+1) at +π/2 and -3π/2, minima (-1) at -π/2 and +3π/2
     public static func sin(_ x:Self)->Self {
+        if x.isNaN { return nan }
         if 2*Element.pi <= x.max - x.min {
             return Self(min:-1, max:+1)
         }
         let nx = normalizeAngle(x)
-        var values = [nx.min, nx.max].map{ Element.cos($0) }
-        if x.contains(+Element.pi/2) { values.append(+1.0) }
-        if x.contains(-Element.pi/2) { values.append(-1.0) }
+        var values = [Element.sin(nx.min), Element.sin(nx.max)]
+        if nx.contains(+Element.pi/2) || nx.contains(-3*Element.pi/2) { values.append(+1.0) }
+        if nx.contains(-Element.pi/2) || nx.contains(+3*Element.pi/2) { values.append(-1.0) }
+        values.sort()
         return Self(min:values.first!, max:values.last!)
     }
+    // tan - unbounded across its poles at odd multiples of π/2, monotone between them
     public static func tan(_ x:Self)->Self {
+        if x.isNaN { return nan }
         if Element.pi <= x.max - x.min {
-            return Interval(min:-1, max:+1)
+            return Self(min:-Element.infinity, max:+Element.infinity)
         }
         let nx = normalizeAngle(x)
-        let values = [nx.min, nx.max].map{ Element.tan($0) }
+        for pole in [Element.pi/2, -Element.pi/2, 3*Element.pi/2, -3*Element.pi/2] {
+            if nx.contains(pole) {
+                return Self(min:-Element.infinity, max:+Element.infinity)
+            }
+        }
+        var values = [Element.tan(nx.min), Element.tan(nx.max)]
+        values.sort()
         return Self(min:values.first!, max:values.last!)
     }
     // binary functions

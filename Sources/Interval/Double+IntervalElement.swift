@@ -54,7 +54,16 @@ private let c_lgamma: @Sendable (Double) -> Double = { x in
 }
 #endif
 
-extension Double: IntervalElement {
+// The members live in a `where Self == Double` protocol extension, NOT in a
+// concrete `extension Double`: a concrete member here would tie with the
+// same-signature concrete members other packages declare on Double (as
+// swift-bignum does, for its own protocols' witnesses), making every direct
+// `Double.exp(1.0)`-style call site ambiguous where both are imported.  A
+// protocol-extension member loses to a concrete one at call sites, but it
+// still witnesses the conformance below just fine.
+extension Double: IntervalElement {}
+
+extension IntervalElement where Self == Double {
     public static func sqrt(_ x: Double) -> Double  { return x.squareRoot() }
     public static func exp(_ x: Double) -> Double   { return c_exp(x) }
     public static func exp2(_ x: Double) -> Double  { return c_exp2(x) }

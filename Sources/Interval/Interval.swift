@@ -1,17 +1,16 @@
 import RealModule
 
-public protocol IntervalElement: Real,
+public protocol IntervalElement: Real, Sendable,
     ExpressibleByFloatLiteral, CustomDebugStringConvertible {}
 
 extension Double:   IntervalElement {}
 extension Float:    IntervalElement {}
 
-#if os(iOS) || os(watchOS)
-#else
+#if arch(x86_64) && !os(Windows) && !os(Android)
 // extension Float80:  IntervalElement {}
 #endif
 /// definition
-public struct Interval<F:IntervalElement> : Hashable {
+public struct Interval<F:IntervalElement> : Hashable, Sendable {
     public typealias Element = F
     public var (min, max):(F, F)
     public init(min:F, max:F) {
@@ -22,7 +21,7 @@ public struct Interval<F:IntervalElement> : Hashable {
 /// inits
 extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public typealias IntegerLiteralType = Element.IntegerLiteralType
-    public typealias FloatLiteralType = Double
+    public typealias FloatLiteralType = Element.FloatLiteralType
     public init(_ x:Element, _ y:Element) {
         self.min = Swift.min(x, y)
         self.max = Swift.max(x, y)
@@ -43,8 +42,8 @@ extension Interval : ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
    public init(integerLiteral value: F.IntegerLiteralType) {
         self.init(Element(integerLiteral:value))
     }
-    public init(floatLiteral value: Double) {
-        self.init(Element(floatLiteral:value as! F.FloatLiteralType))
+    public init(floatLiteral value: Element.FloatLiteralType) {
+        self.init(Element(floatLiteral:value))
     }
     public var avg:Element {
         return (min + max)/2

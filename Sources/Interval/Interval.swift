@@ -33,6 +33,10 @@ public protocol IntervalElement: FloatingPoint, Sendable,
     static func pow(_ x: Self, _ y: Self) -> Self
     static func pow(_ x: Self, _ n: Int) -> Self
     static func root(_ x: Self, _ n: Int) -> Self
+    static func erf(_ x: Self) -> Self
+    static func erfc(_ x: Self) -> Self
+    static func gamma(_ x: Self) -> Self
+    static func logGamma(_ x: Self) -> Self
 }
 
 #if arch(x86_64) && !os(Windows) && !os(Android)

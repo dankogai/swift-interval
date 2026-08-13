@@ -108,6 +108,68 @@ import Testing
         #expect(s.err < 1e-10)
     }
 
+    // MARK: special functions
+
+    @Test func erfIsMonotone() {
+        // increasing: endpoints map to endpoints, in order
+        let m = I<D>.erf(I(D(-1), D(2)))
+        #expect(m.min == D.erf(-1) && m.max == D.erf(2))
+        #expect(I<D>.erf(I(D(0))).contains(0.0))
+        // decreasing twin, endpoints swapped
+        let c = I<D>.erfc(I(D(-1), D(2)))
+        #expect(c.min == D.erfc(2) && c.max == D.erfc(-1))
+        // erf + erfc = 1, as intervals
+        let x = 0.5 ± 0.125
+        #expect((I.erf(x) + I.erfc(x)).contains(1.0))
+    }
+
+    @Test func gammaOnThePositiveAxis() {
+        // Γ(n+1) = n!, exactly representable
+        #expect(I<D>.gamma(I(D(5))).contains(24.0))
+        #expect(I<D>.gamma(I(D(1))).contains(1.0))
+        // monotone stretch: endpoints in, endpoints out
+        let m = I<D>.gamma(I(D(3), D(4)))
+        #expect(m.min == D.gamma(3) && m.max == D.gamma(4))
+        // [1, 2] dips to the minimum Γ(x₀) ≈ 0.8856, below both endpoints
+        let dip = I<D>.gamma(I(D(1), D(2)))
+        #expect(dip.min < 0.8857 && dip.min > 0.8855)
+        #expect(dip.max == 1.0)
+    }
+
+    @Test func gammaBelowZero() {
+        // Γ(-0.5) = -2√π, via the reflection formula, tightly
+        let g = I<D>.gamma(I(D(-0.5)))
+        #expect(g.contains(D.gamma(-0.5)))
+        #expect(g.err < 1e-10)
+        // a pole inside (here -1) means the whole line
+        let pole = I<D>.gamma(I(D(-1.5), D(-0.5)))
+        #expect(pole.min == -D.infinity && pole.max == +D.infinity)
+        // straddling the pole at 0 likewise
+        let mixed = I<D>.gamma(I(D(-0.5), D(0.5)))
+        #expect(mixed.min == -D.infinity && mixed.max == +D.infinity)
+    }
+
+    @Test func logGammaEverywhere() {
+        // logΓ(5) = log(4!) on the positive axis
+        #expect(I<D>.logGamma(I(D(5))).contains(D.log(24)))
+        // logΓ(1) = logΓ(2) = 0 at the endpoints, the minimum in between
+        let dip = I<D>.logGamma(I(D(1), D(2)))
+        #expect(dip.max == 0.0)
+        #expect(dip.min < -0.1214 && dip.min > -0.1215)
+        // log|Γ(-0.5)| = log(2√π), via reflection
+        let neg = I<D>.logGamma(I(D(-0.5)))
+        #expect(neg.contains(D.logGamma(-0.5)))
+        #expect(neg.err < 1e-10)
+        // a pole inside sends the upper bound to +∞ -- and only the upper one
+        let pole = I<D>.logGamma(I(D(-1.5), D(-0.5)))
+        #expect(pole.max == +D.infinity)
+        #expect(pole.min.isFinite)
+        // straddling 0: hull of both sides, lower bound from the positive side
+        let mixed = I<D>.logGamma(I(D(-0.5), D(0.5)))
+        #expect(mixed.max == +D.infinity)
+        #expect(mixed.contains(D.logGamma(0.5)))
+    }
+
     // MARK: remainders
 
     @Test func remaindersMatchDouble() {

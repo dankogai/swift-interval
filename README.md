@@ -59,6 +59,20 @@ Have fun with [macOS.playground] that is a part of this git repo.
 
 [macOS.playground]: ./macOS.playground
 
+### with swift-bignum
+
+`Interval` works with number types beyond `Double` and `Float` — anything that can
+be made an `IntervalElement`. [SwiftBigNumExample](./SwiftBigNumExample/) shows
+`Interval<BigRat>` and `Interval<BigFloat>` via [dankogai/swift-bignum], where
+interval arithmetic becomes *exact*:
+
+```swift
+let about1 = BigRat(1) ± BigRat(1, 10)   // [9/10, 11/10]
+about1 / about1                          // [9/11, 11/9] — the fractions, exactly
+```
+
+[dankogai/swift-bignum]: https://github.com/dankogai/swift-bignum
+
 ## Test
 
 ```sh

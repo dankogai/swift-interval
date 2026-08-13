@@ -2,30 +2,16 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
-## Build generated
-build/
-DerivedData
-
-## Various settings
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-
-## Other
-*.xccheckout
-*.moved-aside
-*.xcuserstate
-*.xcscmblueprint
+## User settings
+xcuserdata/
 
 ## Obj-C/Swift specific
 *.hmap
+
+## App packaging
 *.ipa
+*.dSYM.zip
+*.dSYM
 
 ## Playgrounds
 timeline.xctimeline
@@ -34,11 +20,16 @@ playground.xcworkspace
 # Swift Package Manager
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-.attic/
-.build/
-*.xcodeproj
+Packages/
+Package.pins
 Package.resolved
+*.xcodeproj
+#
+# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
+# hence it is not needed unless you have added a package configuration file to your project
+.swiftpm/
+
+.build/
 
 # CocoaPods
 #
@@ -47,20 +38,34 @@ Package.resolved
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
 #
 # Pods/
+#
+# Add this line if you want to avoid checking in source code from the Xcode workspace
+# *.xcworkspace
 
 # Carthage
 #
 # Add this line if you want to avoid checking in source code from Carthage dependencies.
 # Carthage/Checkouts
 
-Carthage/Build
+Carthage/Build/
 
 # fastlane
 #
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the 
-# screenshots whenever they are needed.
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
 # For more information about the recommended setup visit:
-# https://github.com/fastlane/fastlane/blob/master/docs/Gitignore.md
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
 
 fastlane/report.xml
-fastlane/screenshots
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# VSCode
+.vscode/
+
+# Claude Code
+.claude/
+
+# Anything out of the sight of git
+.attic/

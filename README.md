@@ -50,7 +50,7 @@ let about1 = 1.0 ± 0.1
 Add the following to the `dependencies` of your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/dankogai/swift-interval.git", from: "1.0.0")
+.package(url: "https://github.com/dankogai/swift-interval.git", from: "6.0.0")
 ```
 
 and add `"Interval"` to the dependencies of your target.

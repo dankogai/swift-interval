@@ -69,16 +69,12 @@ rms<Real>: rms(3, 4) = 3.5355339059327378
 Interval as Real: log(exp(1.0±0.5)) = 1.0±0.5
 ```
 
-## Three things worth knowing before you copy this
+## Two things worth knowing before you copy this
 
 **Division endpoints are twice-rounded.** `Interval` divides by
 reciprocal-then-multiply, so `(1 ± 1/16)/(1 ± 1/16)`'s bounds sit within an ulp
 or two of the true `15/17` and `17/15` rather than exactly at their nearest
 floats. The tests assert the honest version.
-
-**Four of `Real`'s members are stubs.** `erf`, `erfc`, `gamma`, `logGamma` on
-`Interval` currently `fatalError("yet to be implemented")`. The conformance is
-real; those four corners of it are not yet.
 
 **`Double.sqrt` becomes ambiguous here.** swift-interval declares
 `Double.sqrt(_:)` (its libm-backed `IntervalElement` witness) and RealModule

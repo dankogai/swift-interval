@@ -160,18 +160,60 @@ extension Interval {
     public static func root(_ x: Interval<F>, _ n: Int) -> Interval<F> {
         return Self(Element.root(x.min, n), Element.root(x.max, n))
     }
-    //: mark todo
+    // erf - strictly increasing
     public static func erf(_ x: Self) -> Self {
-        fatalError("yet to be implemented");
+        return Self(min:Element.erf(x.min), max:Element.erf(x.max))
     }
+    // erfc - strictly decreasing
     public static func erfc(_ x: Self) -> Self {
-        fatalError("yet to be implemented");
+        return Self(min:Element.erfc(x.max), max:Element.erfc(x.min))
     }
+    /// Where the digamma function vanishes: gamma's one critical point on the
+    /// positive axis, a minimum.  Built from integers so it exists for every
+    /// Element; the last-digit error only moves the evaluation *along* the
+    /// curve's flat bottom, so the critical value it yields is second-order
+    /// accurate.
+    private static var gammaMinimumX:Element {
+        return Element(1461632144968362) / Element(1000000000000000)
+    }
+    // gamma - on x > 0, unimodal with its minimum at gammaMinimumX; for x <= 0,
+    // computed through the reflection formula Γ(x) = π / (sin(πx)·Γ(1-x)),
+    // where an interval containing a pole picks up sin ∋ 0 and widens to the
+    // whole line by itself
     public static func gamma(_ x: Self) -> Self {
-        fatalError("yet to be implemented");
+        if x.isNaN { return nan }
+        if Element(0) < x.min {
+            var values = [Element.gamma(x.min), Element.gamma(x.max)]
+            if x.contains(gammaMinimumX) { values.append(Element.gamma(gammaMinimumX)) }
+            values.sort()
+            return Self(min:values.first!, max:values.last!)
+        }
+        if Element(0) < x.max {  // straddles the pole at 0: ±∞ on its two sides
+            return Self(min:-Element.infinity, max:+Element.infinity)
+        }
+        return Self.pi / (sin(Self.pi * x) * gamma(Self(min:1, max:1) - x))
     }
+    // logGamma - log(|Γ(x)|), same shape: unimodal on x > 0, reflected below,
+    // log(π) - log|sin(πx)| - logΓ(1-x), with |sin| ∋ 0 turning into the +∞
+    // upper bound at the poles
     public static func logGamma(_ x: Self) -> Self {
-        fatalError("yet to be implemented");
+        if x.isNaN { return nan }
+        if Element(0) < x.min {
+            var values = [Element.logGamma(x.min), Element.logGamma(x.max)]
+            if x.contains(gammaMinimumX) { values.append(Element.logGamma(gammaMinimumX)) }
+            values.sort()
+            return Self(min:values.first!, max:values.last!)
+        }
+        if Element(0) < x.max {  // straddles 0: the hull of the two sides
+            let neg = logGamma(Self(min:x.min, max:0))
+            let pos = logGamma(Self(min:Element.leastNonzeroMagnitude, max:x.max))
+            return Self(min:Swift.min(neg.min, pos.min), max:Swift.max(neg.max, pos.max))
+        }
+        let s = sin(Self.pi * x)
+        let absSin = Self(
+            min: s.contains(0) ? Element(0) : Swift.min(Swift.abs(s.min), Swift.abs(s.max)),
+            max: Swift.max(Swift.abs(s.min), Swift.abs(s.max))
+        )
+        return log(Self.pi) - log(absSin) - logGamma(Self(min:1, max:1) - x)
     }
-
 }

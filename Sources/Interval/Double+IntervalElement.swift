@@ -40,6 +40,19 @@ private let c_acosh : @Sendable (Double) -> Double = acosh
 private let c_atanh : @Sendable (Double) -> Double = atanh
 private let c_hypot : @Sendable (Double, Double) -> Double = hypot
 private let c_pow   : @Sendable (Double, Double) -> Double = pow
+private let c_erf   : @Sendable (Double) -> Double = erf
+private let c_erfc  : @Sendable (Double) -> Double = erfc
+private let c_tgamma: @Sendable (Double) -> Double = tgamma
+// lgamma is shadowed by an overlay returning (Double, Int); lgamma_r is the
+// same computation without the global sign variable, on every libm we import
+#if os(Windows)
+private let c_lgamma: @Sendable (Double) -> Double = { lgamma($0) }
+#else
+private let c_lgamma: @Sendable (Double) -> Double = { x in
+    var sign: Int32 = 0
+    return lgamma_r(x, &sign)
+}
+#endif
 
 extension Double: IntervalElement {
     public static func sqrt(_ x: Double) -> Double  { return x.squareRoot() }
@@ -81,4 +94,9 @@ extension Double: IntervalElement {
         }
         return c_pow(x, 1/Double(n))
     }
+    public static func erf(_ x: Double) -> Double      { return c_erf(x) }
+    public static func erfc(_ x: Double) -> Double     { return c_erfc(x) }
+    public static func gamma(_ x: Double) -> Double    { return c_tgamma(x) }
+    /// log(|Γ(x)|), the way `RealModule` defines it.
+    public static func logGamma(_ x: Double) -> Double { return c_lgamma(x) }
 }

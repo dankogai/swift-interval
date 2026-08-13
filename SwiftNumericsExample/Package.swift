@@ -1,11 +1,11 @@
 // swift-tools-version: 6.0
 //
-// A demo of using Interval together with dankogai/swift-bignum, and a package of
-// its own so that swift-interval's root manifest depends on nothing but
-// swift-numerics -- SwiftPM resolves every declared dependency whether the target
-// using it is being built or not.
+// A demo of using Interval alongside apple/swift-numerics, and a package of its
+// own so that swift-interval's root manifest keeps its no-dependencies property --
+// SwiftPM resolves every declared dependency whether the target using it is being
+// built or not.
 //
-//     cd SwiftBigNumExample && swift test
+//     cd SwiftNumericsExample && swift test
 //
 // The parent is a `path:` dependency, not a `url:` one.  A URL pointing at `..`
 // makes SwiftPM clone the parent as a git working copy and resolve it to a
@@ -20,26 +20,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftBigNumExample",
+    name: "SwiftNumericsExample",
     products: [
         .library(
-            name: "SwiftBigNumExample",
-            targets: ["SwiftBigNumExample"]
+            name: "SwiftNumericsExample",
+            targets: ["SwiftNumericsExample"]
         ),
     ],
     dependencies: [
         .package(path: ".."),
-        .package(url: "https://github.com/dankogai/swift-bignum.git", from: "6.3.1"),
+        .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
     ],
     targets: [
         .target(
-            name: "SwiftBigNumExample",
+            name: "SwiftNumericsExample",
             dependencies: [
                 .product(name: "Interval", package: "swift-interval"),
-                .product(name: "BigNum", package: "swift-bignum"),
+                .product(name: "RealModule", package: "swift-numerics"),
             ]),
         .testTarget(
-            name: "SwiftBigNumExampleTests",
-            dependencies: ["SwiftBigNumExample"]),
+            name: "SwiftNumericsExampleTests",
+            dependencies: ["SwiftNumericsExample"]),
     ]
 )

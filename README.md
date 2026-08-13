@@ -57,7 +57,11 @@ and add `"Interval"` to the dependencies of your target.
 
 ### with playground
 
-Have fun with [macOS.playground] that is a part of this git repo.
+Have fun with [macOS.playground] that is a part of this git repo: open the
+package folder in Xcode, let it resolve, and the playground pages can
+`import Interval`.  Four pages: a synopsis of the API, the quadratic formula
+with its cancellation made visible, error propagation without the calculus,
+and a scratch pad.
 
 [macOS.playground]: ./macOS.playground
 

@@ -174,7 +174,9 @@ extension Interval {
     /// curve's flat bottom, so the critical value it yields is second-order
     /// accurate.
     private static var gammaMinimumX:Element {
-        return Element(1461632144968362) / Element(1000000000000000)
+        // spelled as Int64: a bare literal is an Int, which these overflow on
+        // 32-bit platforms (watchOS armv7k/arm64_32, wasm32)
+        return Element(1461632144968362 as Int64) / Element(1000000000000000 as Int64)
     }
     // gamma - on x > 0, unimodal with its minimum at gammaMinimumX; for x <= 0,
     // computed through the reflection formula Γ(x) = π / (sin(πx)·Γ(1-x)),

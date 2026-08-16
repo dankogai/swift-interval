@@ -6,12 +6,21 @@
 //  (Float, one empty extension via swift-numerics) and SwiftBigNumExample/
 //  (BigRat and BigFloat, likewise).
 //
+// Every branch here is `canImport`, and the order matters: Android also
+// has Glibc-shaped headers, and WASI would otherwise fall through.  This
+// is the same preamble swift-bignum and swift-complex carry.
 #if canImport(Darwin)
 import Darwin
+#elseif canImport(Bionic)
+import Bionic
+#elseif canImport(Android)
+import Android
 #elseif canImport(Glibc)
 import Glibc
 #elseif canImport(Musl)
 import Musl
+#elseif canImport(WASILibc)
+import WASILibc
 #elseif os(Windows)
 import CRT
 #endif
